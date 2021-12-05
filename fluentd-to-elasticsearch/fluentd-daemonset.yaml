@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentd-ds-pvc
+  labels:
+    k8s-app: fluentd-logging
+    version: v1
+spec:
+  selector:
+    matchLabels:
+      k8s-app: fluentd-logging
+  template:
+    metadata:
+      labels:
+        k8s-app: fluentd-logging
+        version: v1
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        fsGroup: 2000
+        runAsUser: 1000
+      containers:
+      - name: fluentd-ds
+        image: localhost:5000/fluentd-to-elastic:latest
+        ports:
+        - containerPort: 24220
+        resources:
+          limits:
+            memory: 200Mi
+        env:
+          - name:  FLUENTD_CONF
+            value: "fluentd-kube.conf"
+        volumeMounts:
+        - name: fluentd-conf
+          mountPath: /fluentd/etc
+      volumes:
+      - name: fluentd-conf
+        configMap:
+          name: fluentd-config

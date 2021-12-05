@@ -1,0 +1,15 @@
+apiVersion: v1
+data:
+  fluentd-kube.conf: "<source>\r\n    @type tail\r\n    <parse>\r\n        @type nginx\r\n
+    \   </parse>\r\n    path /tmp/nginx/log/access.log\r\n    pos_file /tmp/nginx/access.pos\r\n
+    \   tag nginx.access\r\n</source>\r\n\r\n<source>\r\n    @type tail\r\n    path
+    /tmp/nginx/log/error.log\r\n    pos_file /tmp/nginx/error.pos\r\n    tag nginx.error\r\n
+    \   <parse>\r\n        @type multiline\r\n        format_firstline /^\\d{4}/\\d{2}/\\d{2}
+    \\d{2}:\\d{2}:\\d{2} \\[\\w+\\] (?<pid>\\d+).(?<tid>\\d+): /\r\n        format1
+    /^(?<time>\\d{4}/\\d{2}/\\d{2} \\d{2}:\\d{2}:\\d{2}) \\[(?<log_level>\\w+)\\]
+    (?<pid>\\d+).(?<tid>\\d+): (?\r\n        <message>.*)/\r\n    </parse>\r\n</source>\r\n\r\n<match
+    nginx.*>  \r\n\t@type stdout\r\n</match>"
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: fluentd-config
